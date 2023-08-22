@@ -55,11 +55,13 @@ parser.add_argument('-j', '--matchFusionIsos', action='store_true', dest='j', he
 #/private/groups/brookslab/reference_annotations/
 args = parser.parse_args()
 prefix = '.'.join(args.r.split('.')[:-1])
+print(prefix)
+
 bedFileMade = False
 if len(args.r) > 0 and not args.u and not args.p:
 	process = subprocess.Popen('python3 ' + args.f + ' align -g ' + args.g + ' -r ' + args.r + ' -o ' + prefix + '.aligned' +  #+ ' -m ' + args.x,
-								'; bamToBed -bed12 -i ' + prefix + '.aligned.bam > ' + prefix + '.aligned.bed'
-								'; rm ' + prefix + '.aligned.bam ' + prefix + '.aligned.bam.bai',
+								'; bamToBed -bed12 -i ' + prefix + '.aligned.bam > ' + prefix + '.aligned.bed',
+								#'; rm ' + prefix + '.aligned.bam ' + prefix + '.aligned.bam.bai',
 							   stdout=subprocess.PIPE, shell=True)
 	print(process.communicate()[0].strip())
 	bedFileMade = True
@@ -79,7 +81,8 @@ if not args.p:
 	print(process.communicate()[0].strip())
 	print('done with preprocessing')
 
-outfilename = '/'.join(prefix.split('/')[:-1]) + args.o + prefix.split('/')[-1]
+#outfilename = '/'.join(prefix.split('/')[:-1]) + args.o + prefix.split('/')[-1]
+outfilename = args.o
 if not args.d:
 	args.b = int(args.b)
 	meta = open(outfilename + "-meta.txt", "w")
@@ -110,7 +113,7 @@ if not args.d:
 		if count % 2 > 0:
 			last = line.strip()
 		else:
-			temp = numpy.fromstring(line.rstrip(), dtype=numpy.int, sep=",")
+			temp = numpy.fromstring(line.rstrip(), dtype=int, sep=",")
 			# temp = json.loads('[' + line.rstrip() + ']')
 			junctions[last] = temp
 	print(junctions['chr1'][:10])
@@ -376,6 +379,9 @@ if not args.d:
 			else: metadata.append([i, 'tooClose', 'tc', new_fusions_found[i]['readNames']])#metadata["tooCloseBp"] += 1
 	# print('org fusions', len(orgFusions))
 	# for i in orgFusions: print(i)
+	print('-----------test bam---------------')
+	os.system("ls")
+	print(prefix)
 	correctQ = prefix if os.path.exists(prefix + '.bam') else prefix + '.aligned'
 	if args.s:
 		print('identifying breakpoint sequence - making sam file')

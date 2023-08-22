@@ -96,7 +96,7 @@ if not args.d:
 		if count % 2 > 0:
 			last = line.strip()
 		else:
-			temp = numpy.fromstring(line.rstrip(), dtype=numpy.int, sep=",")
+			temp = numpy.fromstring(line.rstrip(), dtype=int, sep=",")
 			junctions[last] = temp
 	allGeneLoc = {}
 	for line in open(args.t, 'r'):
@@ -113,8 +113,10 @@ if not args.d:
 		line = line.rstrip().split('\t')
 		for i in line: paralogs[i] = line
 	clinicalF = []
-	for line in open("/private/groups/brookslab/cafelton/fusions-code/treehouse-clinical-fusions.txt"):
-		clinicalF.append(frozenset(line.strip().split('--')))
+	#for line in open("/private/groups/brookslab/cafelton/fusions-code/treehouse-clinical-fusions.txt"):
+	#	clinicalF.append(frozenset(line.strip().split('--')))
+	for line in open(os.path.dirname(os.path.realpath(__file__))+"/treehouse-clinical-fusions.txt"):
+		clinicalF.append(line.strip())
 	clinicalF = set(clinicalF)
 	potential_chimeric = {}  # {read name: [entries]}
 	print("finding chimeric reads")
