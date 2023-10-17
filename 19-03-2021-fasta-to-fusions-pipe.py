@@ -59,27 +59,27 @@ print(prefix)
 
 bedFileMade = False
 if len(args.r) > 0 and not args.u and not args.p:
-	process = subprocess.Popen('python3 ' + args.f + ' align -g ' + args.g + ' -r ' + args.r + ' -o ' + prefix + '.aligned' +  #+ ' -m ' + args.x,
-								'; bamToBed -bed12 -i ' + prefix + '.aligned.bam > ' + prefix + '.aligned.bed',
-								#'; rm ' + prefix + '.aligned.bam ' + prefix + '.aligned.bam.bai',
-							   stdout=subprocess.PIPE, shell=True)
-	print(process.communicate()[0].strip())
+	#process = subprocess.Popen('python3 ' + args.f + ' align -g ' + args.g + ' -r ' + args.r + ' -o ' + prefix + '.aligned' +  #+ ' -m ' + args.x,
+	#							'; bamToBed -bed12 -i ' + prefix + '.aligned.bam > ' + prefix + '.aligned.bed',
+	#							#'; rm ' + prefix + '.aligned.bam ' + prefix + '.aligned.bam.bai',
+	#						   stdout=subprocess.PIPE, shell=True)
+	#print(process.communicate()[0].strip())
 	bedFileMade = True
 
 if (bedFileMade or os.path.exists(prefix + '.aligned.bed') or len(args.m) > 0) and not args.c and not args.p:
 	correctQ = args.m if len(args.m) > 0 else prefix + '.aligned.bed'
-	process = subprocess.Popen('python3 ' + args.f + ' correct -g ' + args.g + ' -f ' + args.t + ' -q ' + correctQ + ' -o ' + prefix,
-							   stdout=subprocess.PIPE, shell=True)
-	print(process.communicate()[0].strip())
+	#print('-------------------------------------------')
+	#process = subprocess.Popen('python3 ' + args.f + ' correct -g ' + args.g + ' -f ' + args.t + ' -q ' + correctQ + ' -o ' + prefix,
+	#						   stdout=subprocess.PIPE, shell=True)
+	#print(process.communicate()[0].strip())
 if not args.p:
 	correctQ = args.m if args.c else prefix + '_all_corrected.bed'
 	#'python3 ' + os.path.dirname(os.path.realpath(__file__)) + '/standardizeBed.py' + ' -i ' + correctQ,
 	myCommands = ['bedtools intersect -wao -a ' + correctQ.rstrip('bed').rstrip('.') + '.bed' + ' -b ' + args.a + ' > ' + prefix + '-bedtools-genes.txt',
-				  'python3 ' + os.path.dirname(os.path.realpath(__file__)) + '/bedtoolsGeneHelper.py' + ' -i ' + prefix + '-bedtools-genes.txt',
-				  'rm ' + prefix + '-bedtools-genes.txt']
-	process = subprocess.Popen('; '.join(myCommands), stdout=subprocess.PIPE, shell=True)
-	print(process.communicate()[0].strip())
-	print('done with preprocessing')
+				  'python3 ' + os.path.dirname(os.path.realpath(__file__)) + '/bedtoolsGeneHelper.py' + ' -i ' + prefix + '-bedtools-genes.txt']
+				  #'rm ' + prefix + '-bedtools-genes.txt']
+	#process = subprocess.Popen('; '.join(myCommands), stdout=subprocess.PIPE, shell=True)
+	#print(process.communicate()[0].strip())
 
 #outfilename = '/'.join(prefix.split('/')[:-1]) + args.o + prefix.split('/')[-1]
 outfilename = args.o
@@ -219,10 +219,14 @@ if not args.d:
 				leftLocs[chr] = []
 			leftLocs[chr].append(loc)
 		if len(locs[-1].split('-')) > 1 and locs[-1][:3] == 'chr':
-			chr, loc = locs[-1].split('-')
-			if chr not in rightLocs:
-				rightLocs[chr] = []
-			rightLocs[chr].append(loc)
+			try:
+			    assert len(locs[-1].split('-')) == 2, locs[-1]
+			    chr, loc = locs[-1].split('-')
+			    if chr not in rightLocs:
+			    	rightLocs[chr] = []
+			    rightLocs[chr].append(loc)
+			except AssertionError:
+			    print(locs[-1], locs)
 
 	#JOIN CLOSE REGIONS TOGETHER AND MARK THEM FOR UPDATING
 	updateValues = [[leftLocs, {}], [rightLocs, {}]]
@@ -250,7 +254,12 @@ if not args.d:
 		if len(locs[0].split('-')) > 1 and locs[0][:3] == 'chr':
 			locs[0] = updateValues[0][1][locs[0]]
 		if len(locs[-1].split('-')) > 1 and locs[-1][:3] == 'chr':
-			locs[-1] = updateValues[1][1][locs[-1]]
+            # patch KeyError: 'chr22-38_28785274-29006793.1'
+			try:
+				locs[0] = updateValues[0][1][locs[0]]
+			except KeyError:
+				continue
+
 		if '--'.join(locs) not in new_fusions_found.keys():
 			new_fusions_found['--'.join(locs)] = {}
 			new_fusions_found['--'.join(locs)]['mapScore'] = fusions_found[i]['mapScore']
@@ -878,10 +887,10 @@ if int(args.k) > 0:
 					bedFile.write('\t'.join([chr2, str(int(center2)-args.k), str(int(center2) + args.k), name2]) + '\n')
 			elif line[0][0] == '#':
 				firstLine = line
-	process = subprocess.Popen('bedtools getfasta -fi ' + args.g + ' -bed ' + outfilename + 'Locs.bed' + ' -fo ' + outfilename + 'Genome.fa' + ' -name; ' +
-							   'minimap2 -a ' + outfilename + 'Genome.fa ' + outfilename + "Filtered.fa" + ' > ' + outfilename + 'Remapped.sam; ' +
-							   "sam2bed < " + outfilename + 'Remapped.sam' + ' > ' + outfilename + 'Remapped-unfilt.bed',stdout=subprocess.PIPE, shell=True)
-	print(process.communicate()[0].strip())
+	#process = subprocess.Popen('bedtools getfasta -fi ' + args.g + ' -bed ' + outfilename + 'Locs.bed' + ' -fo ' + outfilename + 'Genome.fa' + ' -name; ' +
+	#						   'minimap2 -a ' + outfilename + 'Genome.fa ' + outfilename + "Filtered.fa" + ' > ' + outfilename + 'Remapped.sam; ' +
+	#						   "sam2bed < " + outfilename + 'Remapped.sam' + ' > ' + outfilename + 'Remapped-unfilt.bed',stdout=subprocess.PIPE, shell=True)
+	#print(process.communicate()[0].strip())
 	maxMapQ = 0
 	with open(outfilename + 'Remapped-unfilt.bed', 'r') as remapped:
 		for line in remapped:
@@ -940,9 +949,9 @@ if int(args.k) > 0:
 			readsOut.write(line)
 
 
-	process = subprocess.Popen('python3 ' + os.path.dirname(os.path.realpath(__file__)) + '/makeAlnSeq.py -f ' + outfilename +
-							   'Genome.fa -r ' + outfilename + 'Remapped-unfilt.bed; rm ' + outfilename + 'Remapped-unfilt.bed',stdout=subprocess.PIPE, shell=True)
-	print(process.communicate()[0].strip())
+	#process = subprocess.Popen('python3 ' + os.path.dirname(os.path.realpath(__file__)) + '/makeAlnSeq.py -f ' + outfilename +
+	#						   'Genome.fa -r ' + outfilename + 'Remapped-unfilt.bed; rm ' + outfilename + 'Remapped-unfilt.bed',stdout=subprocess.PIPE, shell=True)
+	#print(process.communicate()[0].strip())
 
 
 if not args.i:
