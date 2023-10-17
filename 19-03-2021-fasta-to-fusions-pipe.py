@@ -60,7 +60,7 @@ print(prefix)
 
 bedFileMade = False
 if len(args.r) > 0 and not args.u and not args.p:
-	process = subprocess.Popen('python3 ' + args.f + ' align -g ' + args.g + ' -t ' + args.z + ' -r ' + args.r + ' -o ' + prefix + '.aligned' +  #+ ' -m ' + args.x,
+	process = subprocess.Popen('python3 ' + args.f + ' align -g ' + args.g + ' -t ' + str(args.z) + ' -r ' + args.r + ' -o ' + prefix + '.aligned' +  #+ ' -m ' + args.x,
 								'; bamToBed -bed12 -i ' + prefix + '.aligned.bam > ' + prefix + '.aligned.bed',
 								#'; rm ' + prefix + '.aligned.bam ' + prefix + '.aligned.bam.bai',
 							   stdout=subprocess.PIPE, shell=True)
